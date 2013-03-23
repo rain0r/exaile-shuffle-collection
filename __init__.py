@@ -109,6 +109,9 @@ class Shuffle(PlaybackAdapter):
             adds the artist to the last_artists.
             Also removes the first item from last_artists (if its full).
         '''
+        if not self.do_shuffle:
+            return
+
         while True:
             if (self.is_redundant(self.find_track()) == False):
                 break
@@ -151,4 +154,6 @@ class Shuffle(PlaybackAdapter):
             Callback for when a track starts. The next track will be
             added when a track starts, not when a track fades out.
         '''
+        if not self.do_shuffle:
+            return
         self.play()
