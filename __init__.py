@@ -69,10 +69,8 @@ class Shuffle(PlaybackAdapter):
         self.last_artists = []
         self.myTrack = None
         self.tracks = list()
+        self.refresh_track_list()
         self.ban_repeat = 20 # ban an artist for x tracks
-
-        for track in self.exaile.collection.get_tracks():
-             self.tracks.append(track.get_loc_for_io() or [])
 
         # Menu
         providers.register('menubar-tools-menu', menu.simple_separator(None, ['track-properties']))
@@ -87,6 +85,7 @@ class Shuffle(PlaybackAdapter):
         '''
         if menuitem.get_active():
             logger.debug('Shuffle activated.')
+            self.refresh_track_list()
             self.do_shuffle = True
             self.play()
         else:
@@ -157,3 +156,8 @@ class Shuffle(PlaybackAdapter):
         if not self.do_shuffle:
             return
         self.play()
+
+    def refresh_track_list(self):
+        self.tracks = list()
+        for track in self.exaile.collection.get_tracks():
+             self.tracks.append(track.get_loc_for_io() or [])
