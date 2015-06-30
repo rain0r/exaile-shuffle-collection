@@ -31,9 +31,9 @@ from xlgui import main
 from xlgui.widgets import menu
 import glib, gtk, logging, os, random, time, thread
 
-PATH         = os.path.dirname(os.path.realpath(__file__))
-SHUFFLE        = None
-logger         = logging.getLogger(__name__)
+PATH    = os.path.dirname(os.path.realpath(__file__))
+SHUFFLE = None
+LOGGER  = logging.getLogger(__name__)
 
 ### Plugin Handling ###
 
@@ -62,7 +62,7 @@ def disable(exaile):
 
 class Shuffle(PlaybackAdapter):
     def __init__(self, exaile):
-        logger.debug('__init__() called')
+        LOGGER.debug('__init__() called')
         self.exaile = exaile
         self.do_shuffle = False
         self.playlist_handle = main.get_selected_playlist().playlist
@@ -70,10 +70,11 @@ class Shuffle(PlaybackAdapter):
         self.myTrack = None
         self.tracks = list()
         self.refresh_track_list()
-        self.ban_repeat = 20 # ban an artist for x tracks
+        self.ban_repeat = 50 # ban an artist for x tracks
+        random.seed()
 
         # Menu
-        providers.register('menubar-tools-menu', menu.simple_separator(None, ['track-properties']))
+        # providers.register('menubar-tools-menu', menu.simple_separator(None, ['track-properties']))
         self.menu = menu.check_menu_item('shuffle', ['plugin-sep'], 'Shuffle',
             lambda *x: self.do_shuffle, lambda w, n, p, c: self.on_toggled(w))
         providers.register('menubar-tools-menu', self.menu)
@@ -84,12 +85,12 @@ class Shuffle(PlaybackAdapter):
             Enables or disables the shuffle plugin.
         '''
         if menuitem.get_active():
-            logger.debug('Shuffle activated.')
+            LOGGER.debug('Shuffle activated.')
             self.refresh_track_list()
             self.do_shuffle = True
             self.play()
         else:
-            logger.debug('Shuffle deactivated.')
+            LOGGER.debug('Shuffle deactivated.')
             self.do_shuffle = False
 
     def remove_menu_item(self):
@@ -131,7 +132,7 @@ class Shuffle(PlaybackAdapter):
         '''
         for i in self.last_artists:
             if i == myTrack.get_tag_display("artist"):
-                logger.debug("Banning "+myTrack.get_tag_display("artist")+" for Redundancy!")
+                LOGGER.debug("Banning "+myTrack.get_tag_display("artist")+" for Redundancy!")
                 return True
 
         self.myTrack = myTrack
@@ -141,7 +142,6 @@ class Shuffle(PlaybackAdapter):
         '''
             Returns a random track from the collection.
         '''
-        random.seed()
         random_track_id = random.randint(1, len(self.tracks))
         random_track_uri = self.tracks[random_track_id]
 
