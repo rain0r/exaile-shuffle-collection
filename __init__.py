@@ -16,30 +16,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-from xl import (
-    event,
-    player,
-    providers,
-    settings,
-    trax
-)
-from xl.player.adapters import (
-    PlaybackAdapter,
-    QueueAdapter
-)
-from xlgui import main
-from xlgui.widgets import menu
-import glib, gtk, logging, os, random, time, thread
+import glib
+import gtk
+import logging
+import os
+import random
+import time
+import thread
+import xl
+import xlgui
+import xl.player.adapters
 
-PATH    = os.path.dirname(os.path.realpath(__file__))
 SHUFFLE = None
 LOGGER  = logging.getLogger(__name__)
 
-### Plugin Handling ###
-
 def enable(exaile):
-    if (exaile.loading):
-        event.add_callback(_enable, 'exaile_loaded')
+    if exaile.loading:
+        xl.event.add_callback(_enable, 'exaile_loaded')
     else:
         _enable(None, exaile, None)
 
@@ -58,27 +51,24 @@ def disable(exaile):
     if SHUFFLE:
         SHUFFLE = None
 
-### The Actual Stuff ###
-
-class Shuffle(PlaybackAdapter):
+class Shuffle(xl.player.adapters.PlaybackAdapter):
     def __init__(self, exaile):
         LOGGER.debug('__init__() called')
         self.exaile = exaile
         self.do_shuffle = False
-        self.playlist_handle = main.get_selected_playlist().playlist
+        self.playlist_handle = xlgui.main.get_selected_playlist().playlist
         self.last_artists = []
         self.myTrack = None
         self.tracks = list()
         self.refresh_track_list()
-        self.ban_repeat = 50 # ban an artist for x tracks
+        self.ban_repeat = 100 # ban an artist for x tracks
         random.seed()
 
         # Menu
-        # providers.register('menubar-tools-menu', menu.simple_separator(None, ['track-properties']))
-        self.menu = menu.check_menu_item('shuffle', ['plugin-sep'], 'Shuffle',
+        self.menu = xlgui.widgets.menu.check_menu_item('shuffle', ['plugin-sep'], 'Shuffle',
             lambda *x: self.do_shuffle, lambda w, n, p, c: self.on_toggled(w))
-        providers.register('menubar-tools-menu', self.menu)
-        event.add_callback(self.on_playback_track_start, "playback_track_start", player.PLAYER)
+        xl.providers.register('menubar-tools-menu', self.menu)
+        xl.event.add_callback(self.on_playback_track_start, "playback_track_start", xl.player.PLAYER)
 
     def on_toggled(self, menuitem):
         '''
@@ -145,7 +135,7 @@ class Shuffle(PlaybackAdapter):
         random_track_id = random.randint(1, len(self.tracks))
         random_track_uri = self.tracks[random_track_id]
 
-        myTrack = trax.Track(random_track_uri)
+        myTrack = xl.trax.Track(random_track_uri)
         return myTrack
 
     def on_playback_track_start(self, event, player, track):
