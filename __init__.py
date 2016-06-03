@@ -21,6 +21,8 @@ import xl
 import xlgui
 import xl.player.adapters
 
+from xlgui import main
+
 logger = logging.getLogger(__name__)
 SHUFFLE = None
 
@@ -30,7 +32,7 @@ def enable(exaile):
     global SHUFFLE
     SHUFFLE = Shuffle(exaile)
     if exaile.loading:
-        event.add_callback(__enb, 'gui_loaded')
+        xl.event.add_callback(_enable, 'gui_loaded')
     else:
         _enable(None, exaile, None)
 
@@ -53,7 +55,6 @@ class Shuffle(xl.player.adapters.PlaybackAdapter):
     def __init__(self, exaile):
         self.exaile = exaile
         self.do_shuffle = False
-        self.playlist_handle = xlgui.main.get_selected_playlist().playlist
         self.last_artists = []
         self.tracks = list()
         self.ban_repeat = 100 # ban an artist for x tracks
@@ -99,7 +100,7 @@ class Shuffle(xl.player.adapters.PlaybackAdapter):
             random_track = self.exaile.collection.get_random_track()
             if not self.is_redundant(random_track):
                 break
-        self.playlist_handle.append(random_track)
+        main.get_selected_playlist().playlist.append(random_track)
         if ( len(self.last_artists) >= self.ban_repeat ):
             self.last_artists.pop(0)
         self.last_artists.append(random_track.get_tag_display("artist"))
