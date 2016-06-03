@@ -128,4 +128,4 @@ class Shuffle(xl.player.adapters.PlaybackAdapter):
         self.play()
 
     def stop(self):
-        pass
+        self.remove_menu_item()
