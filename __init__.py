@@ -96,10 +96,12 @@ class Shuffle(xl.player.adapters.PlaybackAdapter):
         '''
         if not self.do_shuffle:
             return
+        fallback = 0
         while True:
             random_track = self.exaile.collection.get_random_track()
-            if not self.is_redundant(random_track):
+            if not self.is_redundant(random_track) or fallback == 50:
                 break
+            fallback += 1
         main.get_selected_playlist().playlist.append(random_track)
         if ( len(self.last_artists) >= self.ban_repeat ):
             self.last_artists.pop(0)
